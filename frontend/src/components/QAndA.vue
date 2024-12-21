@@ -17,16 +17,17 @@
     </div>
 
     <!-- 右侧：知识图谱展示 -->
-    <div class="knowledge-graph">
-      <h2>Knowledge Graph</h2>
-      <div ref="chart" id="graph"></div> <!-- 用于渲染知识图谱的区域 -->
-    </div>
+<!--    <div class="knowledge-graph">-->
+<!--      <h2>Knowledge Graph</h2>-->
+<!--      <div ref="chart" id="graph"></div> &lt;!&ndash; 用于渲染知识图谱的区域 &ndash;&gt;-->
+<!--    </div>-->
   </div>
 </template>
 
 <script>
 import * as echarts from 'echarts';
 import { marked } from 'marked';
+import axios from "axios";
 
 export default {
   data() {
@@ -55,42 +56,17 @@ export default {
         this.isLoading = true;
 
         try {
-          // const response = await axios.get("http://10.43.121.31:8080/api/qa", {
-          //   params: { question : this.question }
-          // });
+          const response = await axios.get("http://10.43.126.232:8080/api/qa", {
+            params: { question : this.question }
+          });
 
-          // this.answers = response.data;
-          // console.log(this.answers)
-          this.answer1 = "对于胸痛，您可以考虑以下药物：\n" +
-              "- **氯吡格雷**：用于预防血栓形成，如果胸痛是由心血管问题如心绞痛或心脏病引起的，可能会有帮助。\n" +
-              "- **华法林、利伐沙班、达比加群、阿哌沙班**：这些是抗凝药物，如果胸痛与血栓形成有关，可能会使用。\n" +
-              "- **厄贝沙坦**：用于控制高血压，如果胸痛与高血压有关，可能会适用。";
-          // this.answer2 = this.answers[1];
-          this.answer3 = [
-            {
-              nodes: [
-                { id: "symptom1", label: "胸痛", type: "症状" },
-                { id: "disease1", label: "冠心病", type: "疾病" },
-                { id: "category1", label: "抗凝药物", type: "药品大类" },
-                { id: "drug1", label: "华法林", type: "在售药品" },
-                { id: "drug2", label: "利伐沙班", type: "在售药品" },
-                { id: "drug3", label: "达比加群", type: "在售药品" },
-                { id: "drug4", label: "阿哌沙班", type: "在售药品" },
-                { id: "drug5", label: "氯吡格雷", type: "在售药品" },
-                { id: "drug6", label: "厄贝沙坦", type: "在售药品" }
-              ],
-              edges: [
-                { source: "symptom1", target: "disease1", relationship: "可能导致" },
-                { source: "disease1", target: "category1", relationship: "推荐药品类别" },
-                { source: "category1", target: "drug1", relationship: "包含" },
-                { source: "category1", target: "drug2", relationship: "包含" },
-                { source: "category1", target: "drug3", relationship: "包含" },
-                { source: "category1", target: "drug4", relationship: "包含" },
-                { source: "category1", target: "drug5", relationship: "包含" },
-                { source: "category1", target: "drug6", relationship: "包含" }
-              ]
-            }
-          ];
+          this.answers = response.data;
+          console.log(this.answers)
+
+          this.answer1 = this.answers[0]
+          this.answer2 = this.answers[1]
+          this.answer3 = this.answers[2]
+          this.answer4 = this.answers[3]
 
           // 模拟AI的回复
           this.temp_answer = ""
@@ -103,14 +79,20 @@ export default {
           }
 
           if (this.answer2.length != 0) {
-            this.process_answer2()
+            this.temp_answer += "<b>推理步骤:</b><br>"
+            this.temp_answer += this.answer2
+          }
+
+          if (this.answer3.length != 0) {
+            this.temp_answer += "<br><br><b>知识图谱中检索到的相关信息:</b><br>"
+            this.temp_answer += this.answer3
           }
 
           setTimeout(() => {
             this.messages.push({ sender: 'bot', text: this.temp_answer });
           }, 1000);
 
-          if (this.answer3.length != 0) {
+          if (this.answer4.length != 0) {
             console.log('Actual Graph Data:', this.answer3);
             // 渲染知识图谱
             this.renderGraph(this.answer3);
@@ -128,66 +110,6 @@ export default {
       }
     },
 
-
-
-    process_answer2(){
-      this.temp_answer += "<div class='answer2-message'>";
-      this.temp_answer += "<b>" + "参考文献：" + "</b>" + "<br>"
-
-      this.title_list = []
-
-      for(this.item of this.answer2){
-        this.flag = 0
-        for(this.title of this.title_list){
-          if(this.item[2] == this.title){
-            this.flag = 1
-            break
-          }
-        }
-        if(this.flag == 0){
-          this.title_list.push(this.item[2])
-        }
-      }
-
-      this.count = 1
-      this.title_list.forEach(item=>{
-        this.temp_answer += `${this.count}. ` + item + "<br>"
-        this.count += 1
-      })
-
-      this.temp_answer += "</div>";
-    },
-
-    // process_answer2(){
-    //   this.temp_answer += "<br><div class='answer2-message'>";
-    //   this.entity_list = []
-    //
-    //   for(this.item of this.answer2){
-    //     this.flag = 0
-    //     for(this.entity of this.entity_list){
-    //       if (this.item[0] == this.entity[0]) {
-    //         this.entity[1] += this.item[1] + "<br>"
-    //         this.entity[2] += this.item[2] + "<br>"
-    //         this.flag = 1
-    //         break
-    //       }
-    //     }
-    //     if(this.flag == 0) {
-    //       this.entity_list.push([this.item[0], this.item[1], this.item[2]+"<br>"])
-    //     }
-    //   }
-    //
-    //   this.entity_list.forEach(items => {
-    //     this.temp_answer += "<b>" + "问题关键词：" + "</b>" + "<br>"
-    //     this.temp_answer += items[0] + "<br>"
-    //     this.temp_answer += "<b>" + "知识图谱匹配实体：" + "</b>" + "<br>"
-    //     this.temp_answer += items[1] + "<br>"
-    //     this.temp_answer += "<b>" + "参考文献：" + "</b>" + "<br>"
-    //     this.temp_answer += items[2] + "<br><br>"
-    //   })
-    //
-    //   this.temp_answer += "</div>";
-    // },
 
     renderGraph(graphs) {
       const graphData = graphs[0]; // 假设只可视化第一个子图
@@ -284,7 +206,7 @@ export default {
 }
 
 .chat-container {
-  width: 60%;
+  width: 100%;
   border-right: 1px solid #ccc;
   display: flex;
   flex-direction: column;

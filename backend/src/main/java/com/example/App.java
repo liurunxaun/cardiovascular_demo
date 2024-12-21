@@ -64,7 +64,7 @@ class QAndAController {
 
             // 创建 POST 请求
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://10.43.108.62:5002/process-data"))
+                    .uri(URI.create("http://10.43.126.232:5002/process-data"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonData))
                     .build();

@@ -4,7 +4,7 @@
 
 后端：
 
-``cd /Users/liurunxuan/学习/科大讯飞实习/ResearchAssistant/demo/backend``
+``cd /Users/liurunxuan/学习/km/心血管/qademo-master/backend``
 
 ``mvn clean install``
 
